@@ -1,0 +1,6 @@
+%{
+  "asciichart": {:hex, :asciichart, "1.0.0", "6ef5dbeab545cb7a0bdce7235958f129de6cd8ad193684dc0953c9a8b4c3db5b", [:mix], [], "hexpm", "edc475e4cdd317599310fa714dbc1f53485c32fc918e23e95f0c2bbb731f2ee2"},
+  "elixir_make": {:hex, :elixir_make, "0.7.4", "5439110c964ffdd8212ca919b5b8beac423085a77ad33d5e394abe812c2d2d75", [:mix], [{:castore, "~> 0.1", [hex: :castore, repo: "hexpm", optional: true]}], "hexpm", "70c33052f7b00c813fd66d15a3cf1f7d1e122860c572ec81b8181b1276074157"},
+  "ex_termbox": {:hex, :ex_termbox, "1.0.2", "30cb94c2585e28797bedfc771687623faff75ab0eb77b08b3214181062bfa4af", [:make, :mix], [{:elixir_make, "~> 0.4", [hex: :elixir_make, repo: "hexpm", optional: false]}], "hexpm", "ca7b14d1019f96466a65ba08bd6cbf46e8b16f87339ef0ed211ba0641f304807"},
+  "ratatouille": {:hex, :ratatouille, "0.5.1", "0f80009fa9534e257505bfe06bff28e030b458d4a33ec2427f7be34a6ef1acf7", [:mix], [{:asciichart, "~> 1.0", [hex: :asciichart, repo: "hexpm", optional: false]}, {:ex_termbox, "~> 1.0", [hex: :ex_termbox, repo: "hexpm", optional: false]}], "hexpm", "b2394eb1cc662eae53ae0fb7c27c04543a6d2ce11ab6dc41202c5c4090cbf652"},
+}
