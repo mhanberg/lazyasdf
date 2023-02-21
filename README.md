@@ -1,6 +1,10 @@
-# Lazyasdf
+# lazyasdf
 
-**TODO: Add description**
+Experimental TUI for [asdf](https://asdf-vm.com/)
+
+```
+$ mix run -e 'Lazyasdf.start()'
+```
 
 ## Installation
 
