@@ -2,6 +2,9 @@
 
 Experimental TUI for [asdf](https://asdf-vm.com/)
 
+<img width="721" alt="image" src="https://user-images.githubusercontent.com/5523984/220379045-4d2e7a7e-2029-4fab-999f-2add3d0eefa3.png">
+
+
 ```
 $ mix run -e 'Lazyasdf.start()'
 ```
