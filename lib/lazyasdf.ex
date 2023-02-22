@@ -106,8 +106,8 @@ defmodule Lazyasdf do
       height = model.height - 5
       # recalculate the scroll position of the window based on which row is selected
       cond do
-        selected_row in y_offset..(height + y_offset) ->
-          item
+        y_offset > 0 and selected_row < height ->
+          %{item | y_offset: y_offset - 1}
 
         selected_row < height ->
           %{item | y_offset: 0}
