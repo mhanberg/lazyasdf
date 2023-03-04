@@ -7,13 +7,14 @@ defmodule Lazyasdf.App do
 
   alias Lazyasdf.Pane.Plugins
   alias Lazyasdf.Pane.Versions
+  alias Lazyasdf.Pane.Info
   alias Lazyasdf.Asdf
 
   @arrow_left key(:arrow_left)
   @arrow_right key(:arrow_right)
 
   defmodule Model do
-    defstruct [:height, :width, :plugins, :versions, selected_pane: :plugins]
+    defstruct [:height, :width, :plugins, :versions, :info, selected_pane: :plugins]
   end
 
   alias __MODULE__.Model
@@ -22,14 +23,16 @@ defmodule Lazyasdf.App do
   def init(%{window: %{height: h, width: w}}) do
     {plugin_state, _} = Plugins.init()
     {version_state, commands} = Versions.init(plugin_state.list)
+    {info_state, info_commands} = Info.init()
 
     {%Model{
        height: h,
        width: w,
        selected_pane: :plugins,
        plugins: plugin_state,
-       versions: version_state
-     }, Command.batch(commands)}
+       versions: version_state,
+       info: info_state
+     }, Command.batch(commands ++ info_commands)}
   end
 
   @impl true
@@ -44,6 +47,9 @@ defmodule Lazyasdf.App do
 
         {_, {{:refresh, plugin}, versions}} ->
           put_in(model.versions[plugin].items, versions)
+
+        {_, {:current, plugins}} ->
+          put_in(model.info.plugins, plugins)
 
         {_, {{:installed, plugin}, versions}} ->
           put_in(model.versions[plugin].installed, versions)
@@ -84,6 +90,7 @@ defmodule Lazyasdf.App do
     view do
       row do
         column size: 6 do
+          Info.render(model)
           Plugins.render(model.selected_pane == :plugins, model.plugins, model)
         end
 

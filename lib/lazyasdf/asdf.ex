@@ -1,4 +1,16 @@
 defmodule Lazyasdf.Asdf do
+  def current do
+    asdf(["current"])
+    |> String.trim()
+    |> String.split("\n")
+    |> Enum.map(&String.trim/1)
+    |> Enum.map(fn line ->
+      [plugin, version | _] = String.split(line)
+
+      {plugin, version}
+    end)
+  end
+
   def list_all(plugin) do
     asdf(["list", "all", plugin])
     |> String.trim()
