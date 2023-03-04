@@ -44,10 +44,10 @@ defmodule Lazyasdf.Pane.Plugins do
 
   def render(selected, model, _) do
     panel title: "Plugins" do
-      table do
-        for {plugin, idx} <- Enum.with_index(model.list) do
-          table_row do
-            table_cell(
+      for {plugin, idx} <- Enum.with_index(model.list) do
+        row do
+          column size: 12 do
+            label(
               [content: plugin] ++
                 if(selected && idx == model.cursor_y, do: @style_selected, else: [])
             )

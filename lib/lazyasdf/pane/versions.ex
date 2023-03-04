@@ -61,31 +61,33 @@ defmodule Lazyasdf.Pane.Versions do
     Enum.at(plugin_versions.items, plugin_versions.cursor_y)
   end
 
-  defp plugin_version(model, version) do
-    installed =
-      if version in model.installed do
-        "* "
-      else
-        "  "
-      end
-
-    installed <> version
+  defp marker(model, version) do
+    if version in model.installed do
+      text(content: "*", color: color(:green))
+    else
+      text(content: " ")
+    end
   end
 
   def render(selected, model, global_model) do
     panel title: Plugins.selected(global_model.plugins), height: :fill do
       viewport offset_y: model[Plugins.selected(global_model.plugins)].y_offset do
-        table do
-          for {version, idx} <-
-                Enum.with_index(model[Plugins.selected(global_model.plugins)].items) do
-            table_row do
-              table_cell(
-                [content: plugin_version(model[Plugins.selected(global_model.plugins)], version)] ++
-                  if(selected && idx == model[Plugins.selected(global_model.plugins)].cursor_y,
-                    do: @style_selected,
-                    else: []
-                  )
-              )
+        for {version, idx} <-
+              Enum.with_index(model[Plugins.selected(global_model.plugins)].items) do
+          row do
+            column size: 12 do
+              label do
+                marker(model[Plugins.selected(global_model.plugins)], version)
+                text(content: " ")
+
+                text(
+                  [content: version] ++
+                    if(selected && idx == model[Plugins.selected(global_model.plugins)].cursor_y,
+                      do: @style_selected,
+                      else: []
+                    )
+                )
+              end
             end
           end
         end
