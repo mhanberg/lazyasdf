@@ -25,13 +25,34 @@ defmodule Lazyasdf.Pane.Versions do
       for p <- plugins, do: Command.new(fn -> Asdf.list(p) end, {:installed, p})
 
     {Map.new(plugins, fn p ->
-       {p, %{items: ["Loading..."], cursor_y: 0, y_offset: 0, installed: [], installing: []}}
+       {p,
+        %{
+          items: ["Loading..."],
+          cursor_y: 0,
+          y_offset: 0,
+          installed: [],
+          installing: [],
+          uninstalling: []
+        }}
      end), version_commands ++ installed_commands}
   end
 
   def update(plugin, model, msg) do
     case msg do
-      {:event, %{key: key}} when key == @enter ->
+      {:event, %{ch: ?u}} ->
+        selected_version = selected_version(plugin, model)
+
+        {update_in(model[plugin].uninstalling, &[selected_version | &1]),
+         Command.new(
+           fn ->
+             Asdf.uninstall(plugin, selected_version)
+
+             :ok
+           end,
+           {:uninstall_finished, {plugin, selected_version}}
+         )}
+
+      {:event, %{ch: ?i}} ->
         selected_version = selected_version(plugin, model)
 
         {update_in(model[plugin].installing, &[selected_version | &1]),
@@ -72,15 +93,31 @@ defmodule Lazyasdf.Pane.Versions do
   end
 
   defp spinner(model, version) do
-    if version in model.installing do
-      text(content: "🔄")
-    else
-      text(content: " ")
+    cond do
+      version in model.installing ->
+        text(content: "🔄")
+
+      version in model.uninstalling ->
+        text(content: "🗑️")
+
+      true ->
+        text(content: " ")
     end
   end
 
+  defp version_count(model, global_model) do
+    length(model[Plugins.selected(global_model.plugins)].items)
+  end
+
+  defp install_count(model, global_model) do
+    length(model[Plugins.selected(global_model.plugins)].installed)
+  end
+
   def render(selected, model, global_model) do
-    panel title: Plugins.selected(global_model.plugins), height: :fill do
+    panel title:
+            Plugins.selected(global_model.plugins) <>
+              " (#{install_count(model, global_model)}/#{version_count(model, global_model)})",
+          height: :fill do
       viewport offset_y: model[Plugins.selected(global_model.plugins)].y_offset do
         for {version, idx} <-
               Enum.with_index(model[Plugins.selected(global_model.plugins)].items) do

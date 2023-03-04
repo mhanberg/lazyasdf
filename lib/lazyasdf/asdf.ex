@@ -13,6 +13,7 @@ defmodule Lazyasdf.Asdf do
     |> String.split("\n")
     |> Enum.map(&String.trim/1)
     |> Enum.map(&String.replace_prefix(&1, "*", ""))
+    |> Enum.reject(&(&1 == "No versions installed"))
     |> Enum.reverse()
   end
 
@@ -22,6 +23,10 @@ defmodule Lazyasdf.Asdf do
 
   def install(plugin, version) do
     asdf(["install", plugin, version])
+  end
+
+  def uninstall(plugin, version) do
+    asdf(["uninstall", plugin, version])
   end
 
   defp asdf(args) do

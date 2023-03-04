@@ -53,6 +53,11 @@ defmodule Lazyasdf.App do
 
           {update_in(model.versions[plugin].installing, &List.delete(&1, version)), command}
 
+        {_, {{:uninstall_finished, {plugin, version}}, :ok}} ->
+          command = Command.new(fn -> Asdf.list(plugin) end, {:installed, plugin})
+
+          {update_in(model.versions[plugin].uninstalling, &List.delete(&1, version)), command}
+
         {:plugins, msg} ->
           pmodel = Plugins.update(model.plugins, msg)
 
