@@ -2,6 +2,8 @@ defmodule Lazyasdf.Pane.Plugins do
   import Ratatouille.Constants, only: [color: 1, key: 1]
   import Ratatouille.View
 
+  alias Lazyasdf.Asdf
+
   @arrow_up key(:arrow_up)
   @arrow_down key(:arrow_down)
   @arrow_left key(:arrow_left)
@@ -14,8 +16,7 @@ defmodule Lazyasdf.Pane.Plugins do
   ]
 
   def init() do
-    {output, 0} = System.cmd("asdf", ["plugin", "list"])
-    plugins = output |> String.trim() |> String.split("\n")
+    plugins = Asdf.plugin_list()
 
     {%{
        list: plugins,

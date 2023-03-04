@@ -5,6 +5,7 @@ defmodule Lazyasdf.Pane.Versions do
   alias Ratatouille.Runtime.Command
 
   alias Lazyasdf.Window
+  alias Lazyasdf.Asdf
   alias Lazyasdf.Pane.Plugins
 
   @arrow_up key(:arrow_up)
@@ -18,23 +19,10 @@ defmodule Lazyasdf.Pane.Versions do
 
   def init(plugins) do
     version_commands =
-      for p <- plugins do
-        Command.new(
-          fn ->
-            {output, 0} = System.cmd("asdf", ["list", "all", p])
-
-            output
-            |> String.trim()
-            |> String.split("\n")
-            |> Enum.map(&String.trim/1)
-            |> Enum.reverse()
-          end,
-          {:refresh, p}
-        )
-      end
+      for p <- plugins, do: Command.new(fn -> Asdf.list_all(p) end, {:refresh, p})
 
     installed_commands =
-      for p <- plugins, do: Command.new(fn -> asdf_list(p) end, {:installed, p})
+      for p <- plugins, do: Command.new(fn -> Asdf.list(p) end, {:installed, p})
 
     {Map.new(plugins, fn p ->
        {p, %{items: ["Loading..."], cursor_y: 0, y_offset: 0, installed: []}}
@@ -71,17 +59,6 @@ defmodule Lazyasdf.Pane.Versions do
     plugin_versions = model[plugin]
 
     Enum.at(plugin_versions.items, plugin_versions.cursor_y)
-  end
-
-  defp asdf_list(plugin) do
-    {output, 0} = System.cmd("asdf", ["list", plugin], stderr_to_stdout: true)
-
-    output
-    |> String.trim()
-    |> String.split("\n")
-    |> Enum.map(&String.trim/1)
-    |> Enum.map(&String.replace_prefix(&1, "*", ""))
-    |> Enum.reverse()
   end
 
   defp plugin_version(model, version) do

@@ -3,21 +3,14 @@ defmodule Lazyasdf.App do
 
   alias Ratatouille.Runtime.Command
   import Ratatouille.View
-  import Ratatouille.Constants, only: [color: 1, key: 1]
+  import Ratatouille.Constants, only: [key: 1]
 
   alias Lazyasdf.Pane.Plugins
   alias Lazyasdf.Pane.Versions
+  alias Lazyasdf.Asdf
 
-  @arrow_up key(:arrow_up)
-  @arrow_down key(:arrow_down)
   @arrow_left key(:arrow_left)
   @arrow_right key(:arrow_right)
-  @enter key(:enter)
-
-  @style_selected [
-    color: color(:black),
-    background: color(:white)
-  ]
 
   defmodule Model do
     defstruct [:height, :width, :plugins, :versions, selected_pane: :plugins]
@@ -54,7 +47,7 @@ defmodule Lazyasdf.App do
           put_in(model.versions[plugin].installed, versions)
 
         {_, {{:install_finished, plugin}, :ok}} ->
-          command = Command.new(fn -> asdf_list(plugin) end, {:installed, plugin})
+          command = Command.new(fn -> Asdf.list(plugin) end, {:installed, plugin})
 
           {model, command}
 
@@ -77,17 +70,6 @@ defmodule Lazyasdf.App do
       end
 
     new_model
-  end
-
-  defp asdf_list(plugin) do
-    {output, 0} = System.cmd("asdf", ["list", plugin], stderr_to_stdout: true)
-
-    output
-    |> String.trim()
-    |> String.split("\n")
-    |> Enum.map(&String.trim/1)
-    |> Enum.map(&String.replace_prefix(&1, "*", ""))
-    |> Enum.reverse()
   end
 
   def render(model) do
