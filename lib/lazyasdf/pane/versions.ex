@@ -25,7 +25,7 @@ defmodule Lazyasdf.Pane.Versions do
       for p <- plugins, do: Command.new(fn -> Asdf.list(p) end, {:installed, p})
 
     {Map.new(plugins, fn p ->
-       {p, %{items: ["Loading..."], cursor_y: 0, y_offset: 0, installed: []}}
+       {p, %{items: ["Loading..."], cursor_y: 0, y_offset: 0, installed: [], installing: []}}
      end), version_commands ++ installed_commands}
   end
 
@@ -34,15 +34,14 @@ defmodule Lazyasdf.Pane.Versions do
       {:event, %{key: key}} when key == @enter ->
         selected_version = selected_version(plugin, model)
 
-        {model,
+        {update_in(model[plugin].installing, &[selected_version | &1]),
          Command.new(
            fn ->
-             {_, 0} =
-               System.cmd("asdf", ["install", plugin, selected_version], stderr_to_stdout: true)
+             Asdf.install(plugin, selected_version)
 
              :ok
            end,
-           {:install_finished, plugin}
+           {:install_finished, {plugin, selected_version}}
          )}
 
       {:event, %{ch: ch, key: key}} when ch == ?j or key == @arrow_down ->
@@ -52,6 +51,9 @@ defmodule Lazyasdf.Pane.Versions do
       {:event, %{ch: ch, key: key}} when ch == ?k or key == @arrow_up ->
         update_in(model[plugin].cursor_y, &max(&1 - 1, 0))
         |> then(&put_in(&1[plugin], Window.calculate_y_offset(&1[plugin])))
+
+      _ ->
+        model
     end
   end
 
@@ -64,6 +66,14 @@ defmodule Lazyasdf.Pane.Versions do
   defp marker(model, version) do
     if version in model.installed do
       text(content: "*", color: color(:green))
+    else
+      text(content: " ")
+    end
+  end
+
+  defp spinner(model, version) do
+    if version in model.installing do
+      text(content: "🔄")
     else
       text(content: " ")
     end
@@ -87,6 +97,9 @@ defmodule Lazyasdf.Pane.Versions do
                       else: []
                     )
                 )
+
+                text(content: " ")
+                spinner(model[Plugins.selected(global_model.plugins)], version)
               end
             end
           end

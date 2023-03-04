@@ -39,6 +39,9 @@ defmodule Lazyasdf.Pane.Plugins do
 
       {:event, %{ch: ch, key: key}} when ch == ?k or key == @arrow_up ->
         update_in(model.cursor_y, &max(&1 - 1, 0))
+
+      _ ->
+        model
     end
   end
 

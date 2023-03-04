@@ -18,6 +18,7 @@ defmodule Lazyasdf.App do
 
   alias __MODULE__.Model
 
+  @impl true
   def init(%{window: %{height: h, width: w}}) do
     {plugin_state, _} = Plugins.init()
     {version_state, commands} = Versions.init(plugin_state.list)
@@ -31,6 +32,7 @@ defmodule Lazyasdf.App do
      }, Command.batch(commands)}
   end
 
+  @impl true
   def update(%Model{} = model, msg) do
     new_model =
       case {model.selected_pane, msg} do
@@ -46,10 +48,10 @@ defmodule Lazyasdf.App do
         {_, {{:installed, plugin}, versions}} ->
           put_in(model.versions[plugin].installed, versions)
 
-        {_, {{:install_finished, plugin}, :ok}} ->
+        {_, {{:install_finished, {plugin, version}}, :ok}} ->
           command = Command.new(fn -> Asdf.list(plugin) end, {:installed, plugin})
 
-          {model, command}
+          {update_in(model.versions[plugin].installing, &List.delete(&1, version)), command}
 
         {:plugins, msg} ->
           pmodel = Plugins.update(model.plugins, msg)
@@ -72,6 +74,7 @@ defmodule Lazyasdf.App do
     new_model
   end
 
+  @impl true
   def render(model) do
     view do
       row do

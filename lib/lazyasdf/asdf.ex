@@ -20,6 +20,10 @@ defmodule Lazyasdf.Asdf do
     asdf(["plugin", "list"]) |> String.trim() |> String.split("\n")
   end
 
+  def install(plugin, version) do
+    asdf(["install", plugin, version])
+  end
+
   defp asdf(args) do
     {output, 0} = System.cmd("asdf", args, stderr_to_stdout: true)
     output
