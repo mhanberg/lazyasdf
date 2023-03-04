@@ -6,9 +6,6 @@ defmodule Lazyasdf.Pane.Plugins do
 
   @arrow_up key(:arrow_up)
   @arrow_down key(:arrow_down)
-  @arrow_left key(:arrow_left)
-  @arrow_right key(:arrow_right)
-  @enter key(:enter)
 
   @style_selected [
     color: color(:black),

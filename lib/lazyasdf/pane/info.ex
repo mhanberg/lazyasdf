@@ -1,21 +1,9 @@
 defmodule Lazyasdf.Pane.Info do
-  import Ratatouille.Constants, only: [color: 1, key: 1]
   import Ratatouille.View
 
   alias Ratatouille.Runtime.Command
 
   alias Lazyasdf.Asdf
-
-  @arrow_up key(:arrow_up)
-  @arrow_down key(:arrow_down)
-  @arrow_left key(:arrow_left)
-  @arrow_right key(:arrow_right)
-  @enter key(:enter)
-
-  @style_selected [
-    color: color(:black),
-    background: color(:white)
-  ]
 
   def init() do
     command = Command.new(fn -> Asdf.current() end, :current)
