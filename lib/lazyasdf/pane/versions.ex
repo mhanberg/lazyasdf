@@ -10,7 +10,6 @@ defmodule Lazyasdf.Pane.Versions do
 
   @arrow_up key(:arrow_up)
   @arrow_down key(:arrow_down)
-  @enter key(:enter)
 
   @style_selected [
     color: color(:black),
@@ -41,6 +40,18 @@ defmodule Lazyasdf.Pane.Versions do
 
   def update(plugin, model, msg) do
     case msg do
+      {:event, %{ch: ?G}} ->
+        selected_version = selected_version(plugin, model)
+
+        {update_in(model[plugin].globaling, &[selected_version | &1]),
+         Command.new(
+           fn ->
+             Asdf.global(plugin, selected_version)
+
+             :ok
+           end,
+           {:global_finished, {plugin, selected_version}}
+         )}
       {:event, %{ch: ?L}} ->
         selected_version = selected_version(plugin, model)
 

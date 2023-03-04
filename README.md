@@ -15,6 +15,7 @@ $ bin/lazyasdf
 - `i` to install a version
 - `u` to uninstall a version
 - `L` to set a local version
+- `G` to set a local version
 
 ## Installation
 
