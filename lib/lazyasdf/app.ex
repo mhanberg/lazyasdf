@@ -54,6 +54,11 @@ defmodule Lazyasdf.App do
         {_, {{:installed, plugin}, versions}} ->
           put_in(model.versions[plugin].installed, versions)
 
+        {_, {{:local_finished, {plugin, version}}, :ok}} ->
+          command = Command.new(fn -> Asdf.current() end, :current)
+
+          {update_in(model.versions[plugin].localing, &List.delete(&1, version)), command}
+
         {_, {{:install_finished, {plugin, version}}, :ok}} ->
           command = Command.new(fn -> Asdf.list(plugin) end, {:installed, plugin})
 

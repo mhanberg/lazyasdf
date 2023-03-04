@@ -37,6 +37,10 @@ defmodule Lazyasdf.Asdf do
     asdf(["install", plugin, version])
   end
 
+  def local(plugin, version) do
+    asdf(["local", plugin, version])
+  end
+
   def uninstall(plugin, version) do
     asdf(["uninstall", plugin, version])
   end

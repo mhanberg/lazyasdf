@@ -32,6 +32,8 @@ defmodule Lazyasdf.Pane.Versions do
           y_offset: 0,
           installed: [],
           installing: [],
+          localing: [],
+          globaling: [],
           uninstalling: []
         }}
      end), version_commands ++ installed_commands}
@@ -39,6 +41,19 @@ defmodule Lazyasdf.Pane.Versions do
 
   def update(plugin, model, msg) do
     case msg do
+      {:event, %{ch: ?L}} ->
+        selected_version = selected_version(plugin, model)
+
+        {update_in(model[plugin].localing, &[selected_version | &1]),
+         Command.new(
+           fn ->
+             Asdf.local(plugin, selected_version)
+
+             :ok
+           end,
+           {:local_finished, {plugin, selected_version}}
+         )}
+
       {:event, %{ch: ?u}} ->
         selected_version = selected_version(plugin, model)
 
@@ -99,6 +114,12 @@ defmodule Lazyasdf.Pane.Versions do
 
       version in model.uninstalling ->
         text(content: "🗑️")
+
+      version in model.localing ->
+        text(content: "🏠")
+
+      version in model.globaling ->
+        text(content: "🌎")
 
       true ->
         text(content: " ")
