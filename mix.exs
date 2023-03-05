@@ -27,6 +27,7 @@ defmodule Lazyasdf.MixProject do
         burrito: [
           targets: [
             macos: [os: :darwin, cpu: :x86_64],
+            macos_m1: [os: :darwin, cpu: :aarch64]
           ],
           debug: Mix.env() != :prod,
           no_clean: false
