@@ -6,11 +6,26 @@ Experimental TUI for [asdf](https://asdf-vm.com/)
 
 ## Installation
 
-- brew: `brew install mhanberg/tap/lazyasdf`
+### Using brew
+
+`brew install mhanberg/tap/lazyasdf`
+
+### Using git
+
+You need a `python` executable on your path.
+
+```bash
+git clone https://github.com/mhanberg/lazyasdf.git
+cd lazyasdf
+# asdf plugin add <missing plugins>
+asdf install
+mix deps.get
+mix run --no-halt
+```
 
 ## Usage
 
-- `h`, `j`, `k`, `l` for navigation
+- `h`, `j`, `k`, `l` or arrows for navigation
 - `i` to install a version
 - `u` to uninstall a version
 - `L` to set a local version
