@@ -43,7 +43,8 @@ defmodule Lazyasdf.Pane.Plugins do
   end
 
   def render(selected, model, _) do
-    panel title: "Plugins" do
+    panel title: "Plugins",
+          height: 10 do
       for {plugin, idx} <- Enum.with_index(model.list) do
         row do
           column size: 12 do
