@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -e
+
+function ensure_dep() {
+  if ! command -v "$1" >/dev/null; then
+    echo "$1 not found!"
+    echo ""
+    echo "macOS: \`brew install $1\`"
+    echo "Linux: ¯\\_(ツ)_/¯"
+
+    exit 1
+  fi
+}
+
+function ensure_asdf_plugin() {
+  if [[ "$2" != *"$1"* ]]; then
+    echo "$1 plugin not found, running 'asdf plugin add $1'"
+    asdf plugin add "$1"
+  fi
+}
+
+function main() {
+  local plugins
+
+  plugins="$(asdf plugin list)"
+
+  ensure_dep "asdf"
+  ensure_dep "gcc"
+  ensure_dep "make"
+
+  ensure_asdf_plugin "elixir" "$plugins"
+  ensure_asdf_plugin "erlang" "$plugins"
+  ensure_asdf_plugin "zig" "$plugins"
+  ensure_asdf_plugin "python" "$plugins"
+
+  asdf install
+
+  mix local.hex --force
+  mix local.rebar --force
+
+  mix deps.get
+  mix deps.compile
+}
+
+main

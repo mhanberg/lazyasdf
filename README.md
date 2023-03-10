@@ -12,15 +12,22 @@ Experimental TUI for [asdf](https://asdf-vm.com/)
 
 ### Using git
 
-You need a `python` executable on your path.
-
-```bash
+```shell
 git clone https://github.com/mhanberg/lazyasdf.git
-cd lazyasdf
-# asdf plugin add <missing plugins>
-asdf install
-mix deps.get
-mix run --no-halt
+```
+
+#### Dependencies
+
+1. asdf
+1. gcc
+1. make
+
+```shell
+bin/setup
+```
+
+```shell
+bin/lazyasdf
 ```
 
 ## Usage
