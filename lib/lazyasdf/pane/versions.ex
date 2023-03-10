@@ -52,6 +52,7 @@ defmodule Lazyasdf.Pane.Versions do
            end,
            {:global_finished, {plugin, selected_version}}
          )}
+
       {:event, %{ch: ?L}} ->
         selected_version = selected_version(plugin, model)
 
@@ -145,11 +146,13 @@ defmodule Lazyasdf.Pane.Versions do
     length(model[Plugins.selected(global_model.plugins)].installed)
   end
 
+  defp title(model, global_model) do
+    Plugins.selected(global_model.plugins) <>
+      " (#{install_count(model, global_model)}/#{version_count(model, global_model)})"
+  end
+
   def render(selected, model, global_model) do
-    panel title:
-            Plugins.selected(global_model.plugins) <>
-              " (#{install_count(model, global_model)}/#{version_count(model, global_model)})",
-          height: :fill do
+    panel title: title(model, global_model), height: :fill do
       viewport offset_y: model[Plugins.selected(global_model.plugins)].y_offset do
         for {version, idx} <-
               Enum.with_index(model[Plugins.selected(global_model.plugins)].items) do

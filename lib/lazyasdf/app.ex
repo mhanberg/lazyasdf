@@ -95,9 +95,27 @@ defmodule Lazyasdf.App do
     new_model
   end
 
+  defp space(), do: text(content: " ")
+
+  defp help_bar(_model) do
+    bar do
+      label do
+        text(content: "[h/j/k/l] movement")
+        space()
+        text(content: "[i]nstall")
+        space()
+        text(content: "[u]ninstall")
+        space()
+        text(content: "set [L]ocal")
+        space()
+        text(content: "set [G]lobal")
+      end
+    end
+  end
+
   @impl true
   def render(model) do
-    view do
+    view bottom_bar: help_bar(model) do
       row do
         column size: 6 do
           Info.render(model)
@@ -106,6 +124,12 @@ defmodule Lazyasdf.App do
 
         column size: 6 do
           Versions.render(model.selected_pane == :versions, model.versions, model)
+        end
+      end
+
+      row do
+        column size: 12 do
+          label(content: "")
         end
       end
     end
