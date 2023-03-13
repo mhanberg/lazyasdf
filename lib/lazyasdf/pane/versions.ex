@@ -145,31 +145,34 @@ defmodule Lazyasdf.Pane.Versions do
     length(model[Plugins.selected(global_model.plugins)].installed)
   end
 
-  def render(selected, model, global_model) do
+  def render(selected, model, %{height: height} = global_model) do
+    selected_model = model[Plugins.selected(global_model.plugins)]
+
     panel title:
             Plugins.selected(global_model.plugins) <>
               " (#{install_count(model, global_model)}/#{version_count(model, global_model)})",
           height: :fill do
-      viewport offset_y: model[Plugins.selected(global_model.plugins)].y_offset do
-        for {version, idx} <-
-              Enum.with_index(model[Plugins.selected(global_model.plugins)].items) do
-          row do
-            column size: 12 do
-              label do
-                marker(model[Plugins.selected(global_model.plugins)], version)
-                text(content: " ")
+      for {version, idx} <-
+            selected_model.items
+            |> Enum.drop(selected_model.y_offset)
+            |> Enum.take(height - 3)
+            |> Enum.with_index do
+        row do
+          column size: 12 do
+            label do
+              marker(selected_model, version)
+              text(content: " ")
 
-                text(
-                  [content: version] ++
-                    if(selected && idx == model[Plugins.selected(global_model.plugins)].cursor_y,
-                      do: @style_selected,
-                      else: []
-                    )
-                )
+              text(
+                [content: version] ++
+                  if(selected && idx + selected_model.y_offset == selected_model.cursor_y,
+                    do: @style_selected,
+                    else: []
+                  )
+              )
 
-                text(content: " ")
-                spinner(model[Plugins.selected(global_model.plugins)], version)
-              end
+              text(content: " ")
+              spinner(selected_model, version)
             end
           end
         end
