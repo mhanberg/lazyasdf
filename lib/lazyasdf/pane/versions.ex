@@ -142,7 +142,7 @@ defmodule Lazyasdf.Pane.Versions do
     Enum.at(model.list, model.cursor_y)
   end
 
-  def render(selected, model, %{height: height} = global_model) do
+  def render(selected, model, %{height: height, only_installed: only_installed} = global_model) do
     selected_model = model[selected_plugin(global_model.plugins)]
 
     panel title:
@@ -150,7 +150,7 @@ defmodule Lazyasdf.Pane.Versions do
               " (#{install_count(model, global_model)}/#{version_count(model, global_model)})",
           height: :fill do
       for {version, idx} <-
-            selected_model.items
+            if(only_installed, do: selected_model.installed, else: selected_model.items)
             |> Enum.drop(selected_model.y_offset)
             |> Enum.take(height - 3)
             |> Enum.with_index do

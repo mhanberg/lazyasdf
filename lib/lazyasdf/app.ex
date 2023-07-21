@@ -14,7 +14,7 @@ defmodule Lazyasdf.App do
   @arrow_right key(:arrow_right)
 
   defmodule Model do
-    defstruct [:height, :width, :plugins, :versions, :info, selected_pane: :plugins]
+    defstruct [:height, :width, :plugins, :versions, :info, selected_pane: :plugins, only_installed: true]
   end
 
   alias __MODULE__.Model
@@ -28,7 +28,6 @@ defmodule Lazyasdf.App do
     {%Model{
        height: h,
        width: w,
-       selected_pane: :plugins,
        plugins: plugin_state,
        versions: version_state,
        info: info_state
@@ -45,6 +44,9 @@ defmodule Lazyasdf.App do
 
         {_, {:event, %{ch: ch, key: key}}} when ch == ?l or key == @arrow_right ->
           put_in(model.selected_pane, :versions)
+
+        {_, {:event, %{ch: ?a}}} ->
+          put_in(model.only_installed, !model.only_installed)
 
         {_, {{:refresh, plugin}, versions}} ->
           put_in(model.versions[plugin].items, versions)
@@ -100,12 +102,14 @@ defmodule Lazyasdf.App do
     new_model
   end
 
-  defp space(), do: text(content: " ")
+  defp space(), do: text(content: " | ")
 
-  defp help_bar(%{selected_pane: :versions} = _model) do
+  defp help_bar(%{selected_pane: :versions} = model) do
     bar do
       label do
         text(content: "[h/j/k/l] movement")
+        space()
+        text(content: if(model.only_installed, do: "show [a]ll", else: "show only inst[a]lled"))
         space()
         text(content: "[i]nstall")
         space()
@@ -120,10 +124,12 @@ defmodule Lazyasdf.App do
     end
   end
 
-  defp help_bar(_model) do
+  defp help_bar(model) do
     bar do
       label do
         text(content: "[h/j/k/l] movement")
+        space()
+        text(content: if(model.only_installed, do: "show [a]ll", else: "show only inst[a]lled"))
         space()
         text(content: "[q]uit")
       end
