@@ -18,9 +18,12 @@ defmodule Lazyasdf.Pane.Info do
     model
   end
 
-  def render(%{info: info} = _model) do
-    panel title: "Info" do
-      for {p, v} <- info.plugins do
+  def render(%{info: info, height: height} = _model) do
+    height = height - 11
+
+    panel title: "Info",
+          height: height do
+      for {p, v} <- info.plugins |> Enum.drop(0) |> Enum.take(max(height - 3, 0)) do
         row do
           column size: 3 do
             label do
