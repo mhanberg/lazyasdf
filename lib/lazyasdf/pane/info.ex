@@ -19,7 +19,7 @@ defmodule Lazyasdf.Pane.Info do
   end
 
   def render(%{info: info, height: height} = _model) do
-    height = height - 10
+    height = height - 11
 
     panel title: "Info",
           height: height do
