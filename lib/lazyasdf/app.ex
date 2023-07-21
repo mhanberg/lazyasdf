@@ -21,8 +21,8 @@ defmodule Lazyasdf.App do
 
   @impl true
   def init(%{window: %{height: h, width: w}}) do
-    {plugin_state, _} = Plugins.init()
-    {version_state, commands} = Versions.init(plugin_state.list)
+    {plugin_state, load_versions_for_first_plugin} = Plugins.init()
+    {version_state, _} = Versions.init(plugin_state.list)
     {info_state, info_commands} = Info.init()
 
     {%Model{
@@ -32,7 +32,8 @@ defmodule Lazyasdf.App do
        plugins: plugin_state,
        versions: version_state,
        info: info_state
-     }, Command.batch(commands ++ info_commands)}
+
+     }, Command.batch(load_versions_for_first_plugin ++ info_commands)}
   end
 
   @impl true
@@ -75,9 +76,13 @@ defmodule Lazyasdf.App do
           {update_in(model.versions[plugin].uninstalling, &List.delete(&1, version)), command}
 
         {:plugins, msg} ->
-          pmodel = Plugins.update(model.plugins, msg)
+          case Plugins.update(model.plugins, msg) do
+            {pmodel, command} ->
+              {put_in(model.plugins, pmodel), command}
 
-          put_in(model.plugins, pmodel)
+            pmodel ->
+              put_in(model.plugins, pmodel)
+          end
 
         {:versions, msg} ->
           case Versions.update(Plugins.selected(model.plugins), model.versions, msg) do

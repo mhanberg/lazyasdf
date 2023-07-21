@@ -6,7 +6,6 @@ defmodule Lazyasdf.Pane.Versions do
 
   alias Lazyasdf.Window
   alias Lazyasdf.Asdf
-  alias Lazyasdf.Pane.Plugins
 
   @arrow_up key(:arrow_up)
   @arrow_down key(:arrow_down)
@@ -17,12 +16,6 @@ defmodule Lazyasdf.Pane.Versions do
   ]
 
   def init(plugins) do
-    version_commands =
-      for p <- plugins, do: Command.new(fn -> Asdf.list_all(p) end, {:refresh, p})
-
-    installed_commands =
-      for p <- plugins, do: Command.new(fn -> Asdf.list(p) end, {:installed, p})
-
     {Map.new(plugins, fn p ->
        {p,
         %{
@@ -35,7 +28,7 @@ defmodule Lazyasdf.Pane.Versions do
           globaling: [],
           uninstalling: []
         }}
-     end), version_commands ++ installed_commands}
+     end), []}
   end
 
   def update(plugin, model, msg) do
@@ -138,18 +131,22 @@ defmodule Lazyasdf.Pane.Versions do
   end
 
   defp version_count(model, global_model) do
-    length(model[Plugins.selected(global_model.plugins)].items)
+    length(model[selected_plugin(global_model.plugins)].items)
   end
 
   defp install_count(model, global_model) do
-    length(model[Plugins.selected(global_model.plugins)].installed)
+    length(model[selected_plugin(global_model.plugins)].installed)
+  end
+
+  def selected_plugin(model) do
+    Enum.at(model.list, model.cursor_y)
   end
 
   def render(selected, model, %{height: height} = global_model) do
-    selected_model = model[Plugins.selected(global_model.plugins)]
+    selected_model = model[selected_plugin(global_model.plugins)]
 
     panel title:
-            Plugins.selected(global_model.plugins) <>
+            selected_plugin(global_model.plugins) <>
               " (#{install_count(model, global_model)}/#{version_count(model, global_model)})",
           height: :fill do
       for {version, idx} <-
