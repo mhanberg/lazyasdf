@@ -97,7 +97,7 @@ defmodule Lazyasdf.App do
 
   defp space(), do: text(content: " ")
 
-  defp help_bar(_model) do
+  defp help_bar(%{selected_pane: :versions} = _model) do
     bar do
       label do
         text(content: "[h/j/k/l] movement")
@@ -109,6 +109,18 @@ defmodule Lazyasdf.App do
         text(content: "set [L]ocal")
         space()
         text(content: "set [G]lobal")
+        space()
+        text(content: "[q]uit")
+      end
+    end
+  end
+
+  defp help_bar(_model) do
+    bar do
+      label do
+        text(content: "[h/j/k/l] movement")
+        space()
+        text(content: "[q]uit")
       end
     end
   end
