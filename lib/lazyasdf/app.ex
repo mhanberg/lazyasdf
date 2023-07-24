@@ -87,7 +87,7 @@ defmodule Lazyasdf.App do
           end
 
         {:versions, msg} ->
-          case Versions.update(Plugins.selected(model.plugins), model.versions, msg) do
+          case Versions.update(Plugins.selected(model.plugins), model.versions, model.only_installed, msg) do
             {vmodel, command} ->
               {put_in(model.versions, vmodel), command}
 

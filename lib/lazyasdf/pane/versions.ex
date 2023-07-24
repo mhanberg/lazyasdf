@@ -31,10 +31,10 @@ defmodule Lazyasdf.Pane.Versions do
      end), []}
   end
 
-  def update(plugin, model, msg) do
+  def update(plugin, model, only_installed, msg) do
     case msg do
       {:event, %{ch: ?G}} ->
-        selected_version = selected_version(plugin, model)
+        selected_version = selected_version(plugin, model, only_installed)
 
         {update_in(model[plugin].globaling, &[selected_version | &1]),
          Command.new(
@@ -46,7 +46,7 @@ defmodule Lazyasdf.Pane.Versions do
            {:global_finished, {plugin, selected_version}}
          )}
       {:event, %{ch: ?L}} ->
-        selected_version = selected_version(plugin, model)
+        selected_version = selected_version(plugin, model, only_installed)
 
         {update_in(model[plugin].localing, &[selected_version | &1]),
          Command.new(
@@ -59,7 +59,7 @@ defmodule Lazyasdf.Pane.Versions do
          )}
 
       {:event, %{ch: ?u}} ->
-        selected_version = selected_version(plugin, model)
+        selected_version = selected_version(plugin, model, only_installed)
 
         {update_in(model[plugin].uninstalling, &[selected_version | &1]),
          Command.new(
@@ -72,7 +72,7 @@ defmodule Lazyasdf.Pane.Versions do
          )}
 
       {:event, %{ch: ?i}} ->
-        selected_version = selected_version(plugin, model)
+        selected_version = selected_version(plugin, model, only_installed)
 
         {update_in(model[plugin].installing, &[selected_version | &1]),
          Command.new(
@@ -85,7 +85,7 @@ defmodule Lazyasdf.Pane.Versions do
          )}
 
       {:event, %{ch: ch, key: key}} when ch == ?j or key == @arrow_down ->
-        update_in(model[plugin].cursor_y, &min(&1 + 1, Enum.count(model[plugin].items) - 1))
+        update_in(model[plugin].cursor_y, &min(&1 + 1, Enum.count(if(only_installed, do: model[plugin].installed, else: model[plugin].items)) - 1))
         |> then(&put_in(&1[plugin], Window.calculate_y_offset(&1[plugin])))
 
       {:event, %{ch: ch, key: key}} when ch == ?k or key == @arrow_up ->
@@ -97,10 +97,11 @@ defmodule Lazyasdf.Pane.Versions do
     end
   end
 
-  defp selected_version(plugin, model) do
+  defp selected_version(plugin, model, only_installed) do
     plugin_versions = model[plugin]
 
-    Enum.at(plugin_versions.items, plugin_versions.cursor_y)
+    if(only_installed, do: plugin_versions.installed, else: plugin_versions.items)
+    |> Enum.at(plugin_versions.cursor_y)
   end
 
   defp marker(model, version) do
