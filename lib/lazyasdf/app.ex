@@ -14,25 +14,25 @@ defmodule Lazyasdf.App do
   @arrow_right key(:arrow_right)
 
   defmodule Model do
-    defstruct [:height, :width, :plugins, :versions, :info, selected_pane: :plugins]
+    defstruct [:height, :width, :plugins, :versions, :info, selected_pane: :plugins, only_installed: true]
   end
 
   alias __MODULE__.Model
 
   @impl true
   def init(%{window: %{height: h, width: w}}) do
-    {plugin_state, _} = Plugins.init()
-    {version_state, commands} = Versions.init(plugin_state.list)
+    {plugin_state, load_versions_for_first_plugin} = Plugins.init()
+    {version_state, _} = Versions.init(plugin_state.list)
     {info_state, info_commands} = Info.init()
 
     {%Model{
        height: h,
        width: w,
-       selected_pane: :plugins,
        plugins: plugin_state,
        versions: version_state,
        info: info_state
-     }, Command.batch(commands ++ info_commands)}
+
+     }, Command.batch(load_versions_for_first_plugin ++ info_commands)}
   end
 
   @impl true
@@ -44,6 +44,9 @@ defmodule Lazyasdf.App do
 
         {_, {:event, %{ch: ch, key: key}}} when ch == ?l or key == @arrow_right ->
           put_in(model.selected_pane, :versions)
+
+        {_, {:event, %{ch: ?a}}} ->
+          put_in(model.only_installed, !model.only_installed)
 
         {_, {{:refresh, plugin}, versions}} ->
           put_in(model.versions[plugin].items, versions)
@@ -75,12 +78,16 @@ defmodule Lazyasdf.App do
           {update_in(model.versions[plugin].uninstalling, &List.delete(&1, version)), command}
 
         {:plugins, msg} ->
-          pmodel = Plugins.update(model.plugins, msg)
+          case Plugins.update(model.plugins, msg) do
+            {pmodel, command} ->
+              {put_in(model.plugins, pmodel), command}
 
-          put_in(model.plugins, pmodel)
+            pmodel ->
+              put_in(model.plugins, pmodel)
+          end
 
         {:versions, msg} ->
-          case Versions.update(Plugins.selected(model.plugins), model.versions, msg) do
+          case Versions.update(Plugins.selected(model.plugins), model.versions, model.only_installed, msg) do
             {vmodel, command} ->
               {put_in(model.versions, vmodel), command}
 
@@ -95,12 +102,14 @@ defmodule Lazyasdf.App do
     new_model
   end
 
-  defp space(), do: text(content: " ")
+  defp space(), do: text(content: " | ")
 
-  defp help_bar(_model) do
+  defp help_bar(%{selected_pane: :versions} = model) do
     bar do
       label do
         text(content: "[h/j/k/l] movement")
+        space()
+        text(content: if(model.only_installed, do: "show [a]ll", else: "show only inst[a]lled"))
         space()
         text(content: "[i]nstall")
         space()
@@ -109,6 +118,20 @@ defmodule Lazyasdf.App do
         text(content: "set [L]ocal")
         space()
         text(content: "set [G]lobal")
+        space()
+        text(content: "[q]uit")
+      end
+    end
+  end
+
+  defp help_bar(model) do
+    bar do
+      label do
+        text(content: "[h/j/k/l] movement")
+        space()
+        text(content: if(model.only_installed, do: "show [a]ll", else: "show only inst[a]lled"))
+        space()
+        text(content: "[q]uit")
       end
     end
   end

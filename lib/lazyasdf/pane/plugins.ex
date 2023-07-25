@@ -2,6 +2,8 @@ defmodule Lazyasdf.Pane.Plugins do
   import Ratatouille.Constants, only: [color: 1, key: 1]
   import Ratatouille.View
 
+  alias Ratatouille.Runtime.Command
+
   alias Lazyasdf.Asdf
 
   @arrow_up key(:arrow_up)
@@ -14,12 +16,16 @@ defmodule Lazyasdf.Pane.Plugins do
 
   def init() do
     plugins = Asdf.plugin_list()
+    selected = List.first(plugins)
 
     {%{
        list: plugins,
        cursor_y: 0,
-       selected: List.first(plugins)
-     }, []}
+       selected: selected
+     }, [
+       Command.new(fn -> Asdf.list_all(selected) end, {:refresh, selected}),
+       Command.new(fn -> Asdf.list(selected) end, {:installed, selected})
+     ]}
   end
 
   def selected(model) do
@@ -29,13 +35,28 @@ defmodule Lazyasdf.Pane.Plugins do
   def update(model, msg) do
     case msg do
       {:event, %{ch: ch, key: key}} when ch == ?j or key == @arrow_down ->
-        update_in(
-          model.cursor_y,
-          &min(&1 + 1, Enum.count(model.list) - 1)
-        )
+        new_cursor_y = min(model.cursor_y + 1, Enum.count(model.list) - 1)
+        selected = Enum.at(model.list, new_cursor_y)
+
+        {
+          update_in(model.cursor_y, fn _ -> new_cursor_y end),
+          Command.batch([
+            Command.new(fn -> Asdf.list_all(selected) end, {:refresh, selected}),
+            Command.new(fn -> Asdf.list(selected) end, {:installed, selected})
+          ])
+        }
 
       {:event, %{ch: ch, key: key}} when ch == ?k or key == @arrow_up ->
-        update_in(model.cursor_y, &max(&1 - 1, 0))
+        new_cursor_y = max(model.cursor_y - 1, 0)
+        selected = Enum.at(model.list, new_cursor_y)
+
+        {
+          update_in(model.cursor_y, &max(&1 - 1, 0)),
+          Command.batch([
+            Command.new(fn -> Asdf.list_all(selected) end, {:refresh, selected}),
+            Command.new(fn -> Asdf.list(selected) end, {:installed, selected})
+          ])
+        }
 
       _ ->
         model
